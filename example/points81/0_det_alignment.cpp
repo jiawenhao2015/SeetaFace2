@@ -62,6 +62,7 @@ int main()
 	seeta::FaceLandmarker FL(FL_model);
 
 	FD.set(seeta::FaceDetector::PROPERTY_VIDEO_STABLE, 1);
+	//FD.set(seeta::FaceDetector::PROPERTY_THRESHOLD3, 0.8);
 
 	int camera_id = 0;
 	cv::VideoCapture capture(camera_id);
@@ -94,6 +95,9 @@ int main()
 
 		auto faces = FD.detect(simage);
 
+		double t2 = (double)cv::getTickCount();
+		int dettime = (int)((t2 - t1) * 1000 / cv::getTickFrequency());
+
 		for (int i = 0; i < faces.size; ++i)
 		{
 			auto &face = faces.data[i];
@@ -107,13 +111,14 @@ int main()
 		}
 
 
-		double t2 = (double)cv::getTickCount();
-		int cost_time = (int)((t2 - t1) * 1000 / cv::getTickFrequency());
+		double t3 = (double)cv::getTickCount();
+		int cost_time = (int)((t3 - t1) * 1000 / cv::getTickFrequency());
 		totalTime += cost_time;
 		cnt++;
 
 		avgTime = totalTime /cnt;
-		printf("detect && alignment %gms   %d  %.2f\n", (t2 - t1) * 1000 / cv::getTickFrequency(), cost_time,avgTime);
+		printf("detect:%d    det&&align:%d  avg:%.2f\n", 
+			dettime, cost_time,avgTime);
 
 
 		cv::imshow("Frame", frame);

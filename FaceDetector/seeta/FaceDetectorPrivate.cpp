@@ -758,7 +758,8 @@ SeetaFaceInfoArray FaceDetectorPrivate::Detect( const SeetaImageData &image )
     // sclae image
     seeta::Image img = image;
 
-    float scale = 1;
+    //float scale = 1;
+    float scale = 0.5;
     seeta::Image scaled_img = ScaleImage( img, p->width_limit_, p->height_limit_, &scale );
     img = scaled_img;
 

@@ -29,13 +29,14 @@ GET_FILENAME_COMPONENT(NAME ${SOURCE} NAME_WE)
         ${CMAKE_SOURCE_DIR}/SeetaNet/include
         ${CMAKE_SOURCE_DIR}/FaceDetector/include
         ${CMAKE_SOURCE_DIR}/FaceLandmarker/include
+        ${CMAKE_SOURCE_DIR}/beautify/include
         )
     target_include_directories(${NAME} PRIVATE
         ${OpenCV_INCLUDE_DIRS}
         )
 
     target_link_libraries(${NAME} PRIVATE
-        SeetaNet SeetaFaceDetector SeetaFaceLandmarker)
+        SeetaNet SeetaFaceDetector SeetaFaceLandmarker beautify)
     target_link_libraries(${NAME} PRIVATE ${OpenCV_LIBS})
 
     set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
