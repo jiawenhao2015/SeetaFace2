@@ -86,7 +86,7 @@ include(CheckFunctionExists)
 set(BUILD_PLATFORM "${CMAKE_SYSTEM_NAME}")
 
 # default not used FMA
-option(SEETA_USE_FMA "Set to ON to use FMA" OFF)
+option(SEETA_USE_FMA "Set to ON to use FMA" ON)
 if (SEETA_USE_FMA) 
     add_definitions(-DSEETA_USE_FMA)
 endif ()
@@ -129,6 +129,7 @@ option(BUILD_EXAMPLE "Set to ON to build example" ON)
 if(BUILD_EXAMPLE)
     add_subdirectory(example)
 endif(BUILD_EXAMPLE)
+add_subdirectory(beautify)
 
 # 设置安装前缀
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/install CACHE STRING "Install path prefix.") 
