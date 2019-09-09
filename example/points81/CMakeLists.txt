@@ -14,29 +14,61 @@ endif()
 
 find_package(OpenCV REQUIRED)
 
-# add library
-add_executable(${PROJECT_NAME} example.cpp)
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/SeetaNet/include
-    ${CMAKE_SOURCE_DIR}/FaceDetector/include
-    ${CMAKE_SOURCE_DIR}/FaceLandmarker/include
-    )
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${OpenCV_INCLUDE_DIRS}
-    )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    SeetaNet SeetaFaceDetector SeetaFaceLandmarker)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
+# Collect source files
+FILE(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+# Build each source file independently
+foreach(SOURCE ${SRCS})
+GET_FILENAME_COMPONENT(NAME ${SOURCE} NAME_WE)
+  
 
-set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${BUILD_VERSION})
+  # add library
+    add_executable(${NAME} ${SOURCE})
+    target_include_directories(${NAME} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/SeetaNet/include
+        ${CMAKE_SOURCE_DIR}/FaceDetector/include
+        ${CMAKE_SOURCE_DIR}/FaceLandmarker/include
+        )
+    target_include_directories(${NAME} PRIVATE
+        ${OpenCV_INCLUDE_DIRS}
+        )
 
-INSTALL(TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    )
+    target_link_libraries(${NAME} PRIVATE
+        SeetaNet SeetaFaceDetector SeetaFaceLandmarker)
+    target_link_libraries(${NAME} PRIVATE ${OpenCV_LIBS})
+
+    set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    set_target_properties(${NAME} PROPERTIES VERSION ${BUILD_VERSION})
+
+ 
+ 
+
+endforeach(SOURCE)
+
+# # add library
+# add_executable(${PROJECT_NAME} example.cpp)
+# target_include_directories(${PROJECT_NAME} PRIVATE
+#     ${CMAKE_CURRENT_SOURCE_DIR}
+#     ${CMAKE_SOURCE_DIR}/SeetaNet/include
+#     ${CMAKE_SOURCE_DIR}/FaceDetector/include
+#     ${CMAKE_SOURCE_DIR}/FaceLandmarker/include
+#     )
+# target_include_directories(${PROJECT_NAME} PRIVATE
+#     ${OpenCV_INCLUDE_DIRS}
+#     )
+
+# target_link_libraries(${PROJECT_NAME} PRIVATE
+#     SeetaNet SeetaFaceDetector SeetaFaceLandmarker)
+# target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
+
+# set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+# set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${BUILD_VERSION})
+
+# INSTALL(TARGETS ${PROJECT_NAME}
+#     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+#     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+#     )
 
 # Find user and system name
 # SET(SYSTEM_NAME $ENV{USERDOMAIN} CACHE STRING SystemName)
