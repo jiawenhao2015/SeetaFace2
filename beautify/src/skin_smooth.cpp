@@ -117,12 +117,26 @@ namespace beauty
 				if (right_down.x > img.cols) right_down.x = img.cols - 1;
 				if (right_down.y > img.rows) right_down.y = img.rows - 1;
 
+				top_left.x = min(top_left.x, img.cols -1);
+				top_left.y = min(top_left.y, img.rows -1);
+				right_down.x = min(right_down.x, img.cols -1);
+				right_down.y = min(right_down.y, img.rows -1);
+
 				//draw rectangle
 				if (draw_rect_)
 					rectangle(img, top_left, right_down, color);
 				
 				Mat roi = img(Range(top_left.y, right_down.y), Range(top_left.x, right_down.x));
 				//same process
+				//cout<<(roi.data)<<"	"<<tmp1.data<<endl;
+				if(roi.empty())
+				{
+					continue;
+					assert(roi.data != tmp1.data);
+
+				}
+					
+				
 				bilateralFilter(roi, tmp1, dx, fc, fc);
 				
 				tmp2 = (tmp1 - roi + 128);

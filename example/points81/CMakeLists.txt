@@ -8,8 +8,8 @@ cmake_minimum_required(VERSION 2.8)
 project("points81")
 
 if(UNIX)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -fPIC")
 endif()
 
 find_package(OpenCV REQUIRED)
@@ -30,14 +30,17 @@ GET_FILENAME_COMPONENT(NAME ${SOURCE} NAME_WE)
         ${CMAKE_SOURCE_DIR}/FaceDetector/include
         ${CMAKE_SOURCE_DIR}/FaceLandmarker/include
         ${CMAKE_SOURCE_DIR}/beautify/include
+        ${CMAKE_SOURCE_DIR}/ncnndetection/include
+        ${CMAKE_SOURCE_DIR}/3rdparty/ncnn/include
         )
     target_include_directories(${NAME} PRIVATE
         ${OpenCV_INCLUDE_DIRS}
         )
 
-    target_link_libraries(${NAME} PRIVATE
-        SeetaNet SeetaFaceDetector SeetaFaceLandmarker beautify)
-    target_link_libraries(${NAME} PRIVATE ${OpenCV_LIBS})
+    target_link_libraries(${NAME} 
+        SeetaNet SeetaFaceDetector SeetaFaceLandmarker
+        ncnndetection beautify  ${CMAKE_SOURCE_DIR}/3rdparty/ncnn/lib/libncnn.a)
+    target_link_libraries(${NAME}  ${OpenCV_LIBS})
 
     set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
     set_target_properties(${NAME} PROPERTIES VERSION ${BUILD_VERSION})

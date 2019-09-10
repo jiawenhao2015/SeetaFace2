@@ -3,6 +3,7 @@
 #include "beauty/face_lift.h"
 #include "beauty/commontools.h"
 #include <opencv2/highgui/highgui.hpp>
+#include<algorithm>
 
 
 #define MAXNUM 0.5
@@ -257,7 +258,7 @@ namespace beauty
 		float radius_pow = radius * radius;
 		Mat dst = img.clone();
 
-		imshow("dst",dst);
+		if(!dst.empty())imshow("dst",dst);
 
 		//|m-c|^2 in formula
 		//float ddmc = (end_x - start_x) * (end_x - start_x) + (end_y - start_y) * (end_y - start_y);
@@ -423,6 +424,19 @@ namespace beauty
 		{
 			Point2f top_left = Point2f(float(faces[i].x), float(faces[i].y));
 			Point2f right_down = Point2f(faces[i].x + float(faces[i].width), faces[i].y + float(faces[i].height));
+
+
+			top_left.x = max(0, (int)top_left.x);
+			top_left.x = min(float(img.cols) -1, top_left.x);
+			top_left.y = max(0, (int)top_left.y);
+			top_left.y = min(img.rows - 1, (int)top_left.y);
+
+
+			right_down.x = max(0, (int)right_down.x);
+			right_down.x = min(img.cols -1, (int)right_down.x);
+			right_down.y = max(0, (int)right_down.y);
+			right_down.y = min(img.rows - 1, (int)right_down.y);
+
 
 			// printf("int(top_left.y), int(right_down.y),int(top_left.x), int(right_down.x) %d %d %d %d\n",int(top_left.y), int(right_down.y), int(top_left.x), int(right_down.x));
 			// printf("%d %d\n",img.rows,img.cols);
