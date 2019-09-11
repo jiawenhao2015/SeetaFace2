@@ -23,6 +23,7 @@ namespace beauty
 		const int end_x, const int end_y, const float radius);
 
 	std::vector<int> bilinear_insert(const cv::Mat& img, const float ux, const float uy);
+	std::vector<int> bilinear_insert(const cv::Mat& img, const uchar *pSrcData, const float ux, const float uy,const int rows,const int cols);
 
 	//img: face area
 	cv::Mat face_lift(cv::Mat& img,const std::vector<cv::Point2f>& landmarks);
