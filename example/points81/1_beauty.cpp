@@ -240,13 +240,14 @@ int testmtcnn()
 	int minFace = 40;
 	tracker.initTrack(modelPath, minFace);
 
-
+//	VideoWriter video("test3_gulong.mp4", CV_FOURCC('M', 'J', 'P', 'G'), 20.0, Size(1280, 480),1);
+	
 	while (capture.isOpened())
 	{
 		
 		capture.grab();
 		capture.retrieve(frame);
-
+		//frame = imread("/home/jiawenhao/beauty/beautify_linux/imgs/2.jpg");
 		if (frame.empty()) break;
 
 		//cv::resize(frame,frame,cv::Size(320,240));
@@ -260,7 +261,7 @@ int testmtcnn()
 		double t2 = (double)cv::getTickCount();
 		int dettime = (int)((t2 - t1) * 1000 / cv::getTickFrequency());
 
-		cv::rectangle(frame, faceRects[0], CV_RGB(128, 128, 255), 3);
+		//cv::rectangle(frame, faceRects[0], CV_RGB(128, 128, 255), 3);
 
 		
 
@@ -289,19 +290,19 @@ int testmtcnn()
 			auto points = FL.mark(simage, face.pos);
 			vector<Point2f> landmarks;
 
-			cv::rectangle(frame, cv::Rect(face.pos.x, face.pos.y, face.pos.width, face.pos.height), CV_RGB(128, 128, 255), 3);
+			//cv::rectangle(frame, cv::Rect(face.pos.x, face.pos.y, face.pos.width, face.pos.height), CV_RGB(128, 128, 255), 3);
 			for (int i = 0; i < points.size(); i++)
 			{
 				auto point = points[i];
 				landmarks.push_back(cv::Point(point.x, point.y));
 				if(i >= 0 && i <= 8 || i >= 9 && i <= 17)
 				{
-					cv::circle(frame, cv::Point(point.x, point.y), 2, CV_RGB(128, 255, 128), -1);
+					//cv::circle(frame, cv::Point(point.x, point.y), 2, CV_RGB(128, 255, 128), -1);
 				}
 				
 				if(i == 69 || i == 72 || i == 77 || i == 80 || i == 34)
 				{
-					cv::circle(frame, cv::Point(point.x, point.y), 2, CV_RGB(255, 0, 0), -1);
+				//	cv::circle(frame, cv::Point(point.x, point.y), 2, CV_RGB(255, 0, 0), -1);
 				//	printf("-----%d  %d %d\n",i,(int)point.x,(int)point.y);
 					
 				}
@@ -324,9 +325,9 @@ int testmtcnn()
 			dettime, cost_time,avgTime);
 
 
-		cv::imshow("Frame", frame);
+		//	cv::imshow("Frame", frame);
  
-
+		Mat frameOri = frame.clone();
 
 		#if 1
 		//face lift 
@@ -354,7 +355,15 @@ int testmtcnn()
 		printf("alltime %gms\n", (tskin_smooth - t1) * 1000 / cv::getTickFrequency());
 		#endif
 
-		cv::imshow("beautify", frame);
+		//	cv::imshow("beautify", frame);
+		
+
+		Mat saveMat;
+		hconcat(frameOri,frame,saveMat);
+		imshow("diff",saveMat);
+
+		//video << saveMat;
+		
 
 		auto key = cv::waitKey(1);
 		if (key == 27)

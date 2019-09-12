@@ -5,6 +5,7 @@
 #include "beauty/skin_smooth.h"
 #include <vector>
 #include <opencv2/core.hpp>
+#include "beauty/commontools.h"
 
 using namespace std;
 using namespace cv;
@@ -128,7 +129,7 @@ namespace beauty
 				
 				Mat roi = img(Range(top_left.y, right_down.y), Range(top_left.x, right_down.x));
 				//same process
-				//cout<<(roi.data)<<"	"<<tmp1.data<<endl;
+				
 				if(roi.empty())
 				{
 					continue;
@@ -136,14 +137,15 @@ namespace beauty
 
 				}
 					
-				
-				bilateralFilter(roi, tmp1, dx, fc, fc);
-				
+				TimeStatic(3,NULL);
+				bilateralFilter(roi, tmp1, dx, fc, fc);//dx=10 fc=25
+				//bilateralFilter(roi, tmp1, 9, 15, 15);
+					TimeStatic(3,"bilateral filter");
 				tmp2 = (tmp1 - roi + 128);
 				GaussianBlur(tmp2, tmp3, Size(kernel_size, kernel_size), 0, 0);
 				tmp4 = roi + 2 * tmp3 - 255;
 				dst = (roi * (100 - opacity_) + tmp4 * opacity_) / 100;
-
+				
 				dst.copyTo(roi);
 			}
 		}
@@ -153,3 +155,10 @@ namespace beauty
 		// printf("contrastAugement:%gms\n",(t1 - t0) * 1000 / getTickFrequency());
 	}
 } //end namespace beauty
+
+/*
+怀旧风格算法
+R = 0.393 * r + 0.769 * g + 0.189 * b;
+G = 0.349 * r + 0.686 * g + 0.168 * b;
+B = 0.272 * r + 0.534 * g + 0.131 * b;
+*/

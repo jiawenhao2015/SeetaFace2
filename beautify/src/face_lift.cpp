@@ -258,7 +258,7 @@ namespace beauty
 		float radius_pow = radius * radius;
 		Mat dst = img.clone();
 
-		if(!dst.empty())imshow("dst",dst);
+		//if(!dst.empty())imshow("dst",dst);
 
 		uchar *pDstData = dst.data;
 		uchar *pSrcData = img.data;
@@ -440,7 +440,12 @@ namespace beauty
 			//  assert(0);
 
 			float insert_val = part1 + part2 + part3 + part4;
-
+		//	cout<<insert_val<<endl;
+		//	assert(insert_val != 0);
+			if(insert_val <= 4)
+			{
+				insert_val = img.at<Vec3b>(y1, x1)[i];
+			}
 			result.push_back(int(insert_val));
 		}
 		
