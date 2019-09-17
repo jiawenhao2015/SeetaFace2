@@ -61,12 +61,51 @@ namespace beauty
 			pTempData[1] = min(pTempData[1] * 1.2 + 24.0, 255.0);
 			pTempData[2] = min(pTempData[2] * 1.2 + 24.0, 255.0);
 		}
-
-
-
-
 	}
+	//双边滤波 https://cloud.tencent.com/developer/article/1094243
+	void bilateralFilter2(unsigned char* pSrc, unsigned char* pDest, int width, int height, int radius)
+	{
+		float delta = 0.1f;
+		float eDelta = 1.0f / (2 * delta * delta);
 
+		int colorDistTable[256 * 256] = { 0 }; 
+		for (int x = 0; x < 256; x++)
+		{
+			int  * colorDistTablePtr = colorDistTable + (x * 256);
+			for (int y = 0; y < 256; y++)
+			{
+				int  mod = ((x - y) * (x - y))*(1.0f / 256.0f);
+				colorDistTablePtr[y] = 256 * exp(-mod * eDelta);
+			}
+		} 
+		for (int Y = 0; Y < height; Y++)
+		{
+			int Py = Y * width;
+			unsigned char* LinePD = pDest + Py; 
+			unsigned char* LinePS = pSrc + Py;
+			for (int X = 0; X < width; X++)
+			{
+				int sumPix = 0;
+				int sum = 0;
+				int factor = 0;
+
+				for (int i = -radius; i <= radius; i++)
+				{
+					unsigned char* pLine = pSrc + ((Y + i + height) % height)* width;
+					int cPix = 0;
+					int  * colorDistPtr = colorDistTable + LinePS[X] * 256;
+					for (int j = -radius; j <= radius; j++)
+					{
+						cPix = pLine[ (X + j+width)%width];
+						factor = colorDistPtr[cPix];
+						sum += factor;
+						sumPix += (factor *cPix);
+					}
+				}
+				LinePD[X] = (sumPix / sum);
+			}
+		} 
+	}
 	void SkinSmooth::smooth(cv::Mat& img,const vector<cv::Rect>& rects)
 	{
 		//set parameters
@@ -136,17 +175,22 @@ namespace beauty
 					assert(roi.data != tmp1.data);
 
 				}
-					
+				
 				TimeStatic(3,NULL);
-				bilateralFilter(roi, tmp1, dx, fc, fc);//dx=10 fc=25
-				//bilateralFilter(roi, tmp1, 9, 15, 15);
-					TimeStatic(3,"bilateral filter");
+				//bilateralFilter(roi, tmp1, dx, fc, fc);//dx=10 fc=25
+				//bilateralFilter(roi.data, tmp1.data, roi.cols, roi.rows, 10);
+				bilateralFilter(roi, tmp1, 9, 15, 15);
+				TimeStatic(3,"bilateral filter");
 				tmp2 = (tmp1 - roi + 128);
+
+				
 				GaussianBlur(tmp2, tmp3, Size(kernel_size, kernel_size), 0, 0);
+				
 				tmp4 = roi + 2 * tmp3 - 255;
 				dst = (roi * (100 - opacity_) + tmp4 * opacity_) / 100;
 				
 				dst.copyTo(roi);
+				
 			}
 		}
 		// double t0 = (double)getTickCount();
