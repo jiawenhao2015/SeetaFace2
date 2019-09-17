@@ -262,10 +262,15 @@ namespace beauty
 
 		uchar *pDstData = dst.data;
 		uchar *pSrcData = img.data;
+		int rows = img.rows;
+		int cols = img.cols;
 
 		//|m-c|^2 in formula
 		//float ddmc = (end_x - start_x) * (end_x - start_x) + (end_y - start_y) * (end_y - start_y);
-		float ddmc = float(powf((end_x - start_x)*1.0f, 2) + powf((end_y - start_y)*1.0, 2));
+		float disX = end_x - start_x;
+		float disY = end_y - start_y;
+
+		float ddmc = float(powf(disX * 1.0f, 2) + powf(disY * 1.0, 2));
 		TimeStatic(2,NULL);
 		for (int j = 0; j < img.rows; ++j)
 		{
@@ -284,39 +289,64 @@ namespace beauty
 					ratio *= ratio;
 
 					//mapping
-					float ux = i - ratio * (end_x - start_x);
-					float uy = j - ratio * (end_y - start_y);
+					float ux = i - ratio * disX;
+					float uy = j - ratio * disY;
 
-					
+					int x1 = int(ux);
+					int y1 = int(uy);
+					x1 = x1 < 0 ? 0 : x1;
+					y1 = y1 < 0 ? 0 : y1;
+					x1 = x1 >= cols ? cols - 1 : x1;
+					y1 = y1 >= rows ? rows - 1 : y1;
+					int x2 = x1 + 1;
+					int y2 = y1 + 1;
+					x2 = x2 >= cols ? cols - 1 : x2;
+					y2 = y2 >= rows ? rows - 1 : y2;
+					int step = img.step;
+		
+					for (int ch = 0; ch < 3; ch++)
+					{
+						float part1 = pSrcData[y1*step + x1*img.channels() + ch] * (float(x2) - ux) * (float(y2) - uy);
+						float part2 = pSrcData[y1*step + x2*img.channels() + ch] * (ux - float(x1)) * (float(y2) - uy);
+						float part3 = pSrcData[y2*step + x1*img.channels() + ch] * (float(x2) - ux) * (uy - float(y1));
+						float part4 = pSrcData[y2*step + x2*img.channels() + ch] * (ux - float(x1)) * (uy - float(y1));
+
+						float insert_val = part1 + part2 + part3 + part4;
+						if(insert_val  < 4.0) insert_val = img.at<Vec3b>(y1, x1)[ch];
+						pDstData[(j * img.cols + i)*3 + ch] = insert_val;
+					}
+
+
 					// vector<int> insert_val = bilinear_insert(img, ux, uy);
-					vector<int> insert_val = bilinear_insert(img, pSrcData, ux, uy, img.rows, img.cols);
+					// vector<int> insert_val = bilinear_insert(img, pSrcData, ux, uy, img.rows, img.cols);
 										
-					if (insert_val.size() != 3 && insert_val.size() != 1)
-						continue;
+					// if (insert_val.size() != 3 && insert_val.size() != 1)
+					// 	continue;
 
-					if (insert_val.size() == 3)
-					{
+					// if (insert_val.size() == 3)
+					// {
 
-						// cout<<(int)pDstData[(j * img.cols + i)*3]<<"	"
-						// 	<<(int)pDstData[(j * img.cols + i)*3 + 1 ]<<"	"
-						// 	<<(int)pDstData[(j * img.cols + i)*3 + 2]<<endl;
-						// cout<<(int)dst.at<Vec3b>(j, i)[0]<<"	"
-						// 	<<(int)dst.at<Vec3b>(j, i)[1]<<"	"
-						// 	<<(int)dst.at<Vec3b>(j, i)[2]<<endl;
-						// cout<<(int)pSrcData[j*img.step + i*img.channels() + 0]<<"	"
-						// 	<<(int)pSrcData[j*img.step + i*img.channels() + 1]<<"	"
-						// 	<<(int)pSrcData[j*img.step + i*img.channels() + 2]<<endl;
-						//  assert(0);
-						pDstData[(j * img.cols + i)*3] = insert_val[0];
-						pDstData[(j * img.cols + i)*3 + 1] = insert_val[1];
-						pDstData[(j * img.cols + i)*3 + 2] = insert_val[2];
-						// for (int ch = 0; ch < insert_val.size(); ++ch)
-						// 	dst.at<Vec3b>(j, i)[ch] = insert_val[ch];
-					}
-					else
-					{
-						dst.at<uchar>(j, i) = insert_val[0];
-					}
+					// 	// cout<<(int)pDstData[(j * img.cols + i)*3]<<"	"
+					// 	// 	<<(int)pDstData[(j * img.cols + i)*3 + 1 ]<<"	"
+					// 	// 	<<(int)pDstData[(j * img.cols + i)*3 + 2]<<endl;
+					// 	// cout<<(int)dst.at<Vec3b>(j, i)[0]<<"	"
+					// 	// 	<<(int)dst.at<Vec3b>(j, i)[1]<<"	"
+					// 	// 	<<(int)dst.at<Vec3b>(j, i)[2]<<endl;
+					// 	// cout<<(int)pSrcData[j*img.step + i*img.channels() + 0]<<"	"
+					// 	// 	<<(int)pSrcData[j*img.step + i*img.channels() + 1]<<"	"
+					// 	// 	<<(int)pSrcData[j*img.step + i*img.channels() + 2]<<endl;
+					// 	//  assert(0);
+
+					// 	pDstData[(j * img.cols + i)*3] = insert_val[0];
+					// 	pDstData[(j * img.cols + i)*3 + 1] = insert_val[1];
+					// 	pDstData[(j * img.cols + i)*3 + 2] = insert_val[2];
+					// 	// for (int ch = 0; ch < insert_val.size(); ++ch)
+					// 	// 	dst.at<Vec3b>(j, i)[ch] = insert_val[ch];
+					// }
+					// else
+					// {
+					// 	dst.at<uchar>(j, i) = insert_val[0];
+					// }
 				}
 			}			
 		}
@@ -382,10 +412,11 @@ namespace beauty
 		return result;
 	}
 
+	//https://www.cnblogs.com/yssongest/p/5303151.html 3，双线性插值加速以及优化策略
 	vector<int> bilinear_insert(const Mat& img, const uchar *pSrcData, const float ux, const float uy,const int rows,const int cols)
 	{
 		vector<int> result;
-
+		return result;
 			
 
 		int x1 = int(ux);
@@ -410,13 +441,15 @@ namespace beauty
 		}
 
 		 int step = img.step;
+
+
 		
 		for (int i = 0; i < 3; i++)
 		{
-			float part11 = img.at<Vec3b>(y1, x1)[i] * (float(x2) - ux) * (float(y2) - uy);
-			float part21 = img.at<Vec3b>(y1, x2)[i] * (ux - float(x1)) * (float(y2) - uy);
-			float part31 = img.at<Vec3b>(y2, x1)[i] * (float(x2) - ux) * (uy - float(y1));
-			float part41 = img.at<Vec3b>(y2, x2)[i] * (ux - float(x1)) * (uy - float(y1));
+			// float part11 = img.at<Vec3b>(y1, x1)[i] * (float(x2) - ux) * (float(y2) - uy);
+			// float part21 = img.at<Vec3b>(y1, x2)[i] * (ux - float(x1)) * (float(y2) - uy);
+			// float part31 = img.at<Vec3b>(y2, x1)[i] * (float(x2) - ux) * (uy - float(y1));
+			// float part41 = img.at<Vec3b>(y2, x2)[i] * (ux - float(x1)) * (uy - float(y1));
 
 			// float part1 = pSrcData[(y1 * cols + x1)*3 + i] * (float(x2) - ux) * (float(y2) - uy);
 			// float part2 = pSrcData[(y1 * cols + x2)*3 + i] * (ux - float(x1)) * (float(y2) - uy);
@@ -442,7 +475,7 @@ namespace beauty
 			float insert_val = part1 + part2 + part3 + part4;
 		//	cout<<insert_val<<endl;
 		//	assert(insert_val != 0);
-			if(insert_val <= 4)
+			if(insert_val <= 4.0)//avoid black pixel
 			{
 				insert_val = img.at<Vec3b>(y1, x1)[i];
 			}
