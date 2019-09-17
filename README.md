@@ -1,3 +1,49 @@
+**## Face dectection && alignment && beauty
+
+### 1.face detaction
+- 基于ncnn的mtcnn
+  - **code出处**：https://github.com/Longqi-S/ncnn-mtcnn
+  - blog解读--MTCNN人脸及特征点检测---代码应用详解（基于ncnn架构）：https://blog.csdn.net/fuwenyan/article/details/77573755
+  - MTCNN人脸及特征点检测--基于树莓派3B+及ncnn架构 https://blog.csdn.net/yuanlulu/article/details/86498836
+
+
+### 2.face alignment
+- 基于TCNN （龙哥自己训的 68个点的版本）
+  - 参考1（脚本比较全）：https://github.com/cooparation/VanillaCNN_faceLandmark
+  - 数据暂无。。。
+- 基于TLD人脸追踪 
+  - blog： https://blog.csdn.net/renhanchi/article/details/85089265
+  - TLD资料：https://blog.csdn.net/sinat_31135199/article/details/70739106
+  - **code出处** git：https://github.com/HandsomeHans/Face-Tracking-Based-on-OpenTLD-and-RNet
+
+### 3.face beauty
+- 图像处理算法之**瘦脸及放大眼睛** https://blog.csdn.net/grafx/article/details/70232797
+- `face_lift` 接口**code出处**：https://blog.csdn.net/skyqsdyy/article/details/89467143
+
+
+- 图像变形 blog http://www.voidcn.com/article/p-nfwuzbva-rn.html
+- 
+#### 3.1瘦脸
+- 发现核心公式好像都是这一个：https://www.cnblogs.com/xiaotie/archive/2009/12/08/1619046.html
+- 图像瘦脸算法:https://blog.csdn.net/qq_36810544/article/details/89072925
+#### 3.2大眼
+- imageshop博客地址：https://www.cnblogs.com/imageshop/p/3847357.html
+#### 3.1美白磨皮
+- 磨皮算法步骤介绍 https://www.cnblogs.com/Imageshop/p/4709710.html 
+- 算法python版本 https://github.com/PerpetualSmile/BeautyCamera/blob/master/main.py
+
+
+
+-------
+## run
+
+```shell
+mkdir build
+cd build
+cmake ..
+make -j
+```
+----
 # **SeetaFace2**
 
 [![License](https://img.shields.io/badge/license-BSD-blue.svg)](LICENSE)
