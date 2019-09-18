@@ -1,4 +1,4 @@
-**## Face dectection && alignment && beauty
+## Face dectection && alignment && beauty
 
 ### 1.face detaction
 - 基于ncnn的mtcnn
@@ -26,6 +26,7 @@
 #### 3.1瘦脸
 - 发现核心公式好像都是这一个：https://www.cnblogs.com/xiaotie/archive/2009/12/08/1619046.html
 - 图像瘦脸算法:https://blog.csdn.net/qq_36810544/article/details/89072925
+- 插值算法优化：https://www.cnblogs.com/yssongest/p/5303151.html
 #### 3.2大眼
 - imageshop博客地址：https://www.cnblogs.com/imageshop/p/3847357.html
 #### 3.1美白磨皮
