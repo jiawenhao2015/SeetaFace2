@@ -271,7 +271,7 @@ namespace beauty
 		float disY = end_y - start_y;
 
 		float ddmc = float(powf(disX * 1.0f, 2) + powf(disY * 1.0, 2));
-		TimeStatic(2,NULL);
+		//TimeStatic(2,NULL);
 		for (int j = 0; j < img.rows; ++j)
 		{
 			for (int i = 0; i < img.cols; ++i)
@@ -302,17 +302,23 @@ namespace beauty
 					int y2 = y1 + 1;
 					x2 = x2 >= cols ? cols - 1 : x2;
 					y2 = y2 >= rows ? rows - 1 : y2;
+
+					float x2ux = float(x2) - ux;
+					float x1ux = ux - float(x1);
+					float y2uy = float(y2) - uy;
+					float y1uy = uy - float(y1);
+
 					int step = img.step;
 		
 					for (int ch = 0; ch < 3; ch++)
 					{
-						float part1 = pSrcData[y1*step + x1*img.channels() + ch] * (float(x2) - ux) * (float(y2) - uy);
-						float part2 = pSrcData[y1*step + x2*img.channels() + ch] * (ux - float(x1)) * (float(y2) - uy);
-						float part3 = pSrcData[y2*step + x1*img.channels() + ch] * (float(x2) - ux) * (uy - float(y1));
-						float part4 = pSrcData[y2*step + x2*img.channels() + ch] * (ux - float(x1)) * (uy - float(y1));
+						float part1 = pSrcData[y1*step + x1*img.channels() + ch] * x2ux * y2uy;
+						float part2 = pSrcData[y1*step + x2*img.channels() + ch] * x1ux * y2uy;
+						float part3 = pSrcData[y2*step + x1*img.channels() + ch] * x2ux * y1uy;
+						float part4 = pSrcData[y2*step + x2*img.channels() + ch] * x1ux * y1uy;
 
 						float insert_val = part1 + part2 + part3 + part4;
-						if(insert_val  < 4.0) insert_val = img.at<Vec3b>(y1, x1)[ch];
+						if(insert_val  < 4.0) insert_val = pSrcData[y1*step + x1*img.channels() + ch];
 						pDstData[(j * img.cols + i)*3 + ch] = insert_val;
 					}
 
@@ -350,7 +356,7 @@ namespace beauty
 				}
 			}			
 		}
-		TimeStatic(2,"each row ");
+	//	TimeStatic(2,"each row ");
 		return dst;
 	}
 	vector<int> bilinear_insert(const Mat& img, const float ux, const float uy)

@@ -54,12 +54,19 @@ namespace beauty
 		// }
 
 
+		// uchar *pTempData = img.data;
+		// for (int i = 0; i < img.rows * img.cols; i++, pTempData += 3)
+		// {
+		// 	pTempData[0] = min(pTempData[0] * 1.2 + 24.0, 255.0);
+		// 	pTempData[1] = min(pTempData[1] * 1.2 + 24.0, 255.0);
+		// 	pTempData[2] = min(pTempData[2] * 1.2 + 24.0, 255.0);
+		// }
 		uchar *pTempData = img.data;
 		for (int i = 0; i < img.rows * img.cols; i++, pTempData += 3)
 		{
-			pTempData[0] = min(pTempData[0] * 1.2 + 24.0, 255.0);
-			pTempData[1] = min(pTempData[1] * 1.2 + 24.0, 255.0);
-			pTempData[2] = min(pTempData[2] * 1.2 + 24.0, 255.0);
+			pTempData[0] = min(pTempData[0] * 1.05 + 24.0, 255.0);
+			pTempData[1] = min(pTempData[1] * 1.05 + 24.0, 255.0);
+			pTempData[2] = min(pTempData[2] * 1.05 + 24.0, 255.0);
 		}
 	}
 	//双边滤波 https://cloud.tencent.com/developer/article/1094243
@@ -193,10 +200,10 @@ namespace beauty
 				
 			}
 		}
-		// double t0 = (double)getTickCount();
-		// contrastAugement(img);
-		// double t1 = (double)getTickCount();
-		// printf("contrastAugement:%gms\n",(t1 - t0) * 1000 / getTickFrequency());
+		double t0 = (double)getTickCount();
+		contrastAugement(img);
+		double t1 = (double)getTickCount();
+		printf("contrastAugement:%gms\n",(t1 - t0) * 1000 / getTickFrequency());
 	}
 } //end namespace beauty
 
