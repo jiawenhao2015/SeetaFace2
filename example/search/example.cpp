@@ -15,9 +15,9 @@ int main()
 {
     seeta::ModelSetting::Device device = seeta::ModelSetting::CPU;
     int id = 0;
-    seeta::ModelSetting FD_model( "./model/fd_2_00.dat", device, id );
-    seeta::ModelSetting PD_model( "./model/pd_2_00_pts5.dat", device, id );
-    seeta::ModelSetting FR_model( "./model/fr_2_10.dat", device, id );
+    seeta::ModelSetting FD_model( "../models/fd_2_00.dat", device, id );
+    seeta::ModelSetting PD_model( "../models/pd_2_00_pts5.dat", device, id );
+    seeta::ModelSetting FR_model( "../models/fr_2_10.dat", device, id );
     seeta::FaceEngine engine( FD_model, PD_model, FR_model, 2, 16 );
 
     // recognization threshold
@@ -26,7 +26,7 @@ int main()
     //set face detector's min face size
     engine.FD.set( seeta::FaceDetector::PROPERTY_MIN_FACE_SIZE, 80 );
 
-    std::vector<std::string> GalleryImageFilename = { "1.jpg" };
+    std::vector<std::string> GalleryImageFilename = { "1.jpg", "jwh.jpg" ,"jwh2.jpg" };
     std::vector<int64_t> GalleryIndex( GalleryImageFilename.size() );
     for( size_t i = 0; i < GalleryImageFilename.size(); ++i )
     {

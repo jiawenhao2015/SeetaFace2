@@ -31,7 +31,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     SeetaNet SeetaFaceDetector SeetaFaceLandmarker SeetaFaceRecognizer)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
 
-set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set_target_properties(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${BUILD_VERSION})
 
 INSTALL(TARGETS ${PROJECT_NAME}
