@@ -240,7 +240,7 @@ int testmtcnn()
 	int minFace = 40;
 	tracker.initTrack(modelPath, minFace);
 
-//	VideoWriter video("test3_gulong.mp4", CV_FOURCC('M', 'J', 'P', 'G'), 20.0, Size(1280, 480),1);
+	//	VideoWriter video("test3_gulong.mp4", CV_FOURCC('M', 'J', 'P', 'G'), 20.0, Size(1280, 480),1);
 	
 	while (capture.isOpened())
 	{
@@ -341,7 +341,7 @@ int testmtcnn()
 		//eye enlarge
 		beauty::EyeEnlarge eyeEnlarge;
 		eyeEnlarge.generalEyeEnlarge(frame, bbox, multiLandmarks); 
-
+		#endif
 		double teyeEnlarge = (double)cv::getTickCount();
 		printf("teyeEnlarge %gms\n", (teyeEnlarge - tfacelift2) * 1000 / cv::getTickFrequency());
 
@@ -353,7 +353,7 @@ int testmtcnn()
 		printf("tskin_smooth %gms\n", (tskin_smooth - teyeEnlarge) * 1000 / cv::getTickFrequency());
 
 		printf("alltime %gms\n", (tskin_smooth - t1) * 1000 / cv::getTickFrequency());
-		#endif
+		
 
 		//	cv::imshow("beautify", frame);
 		
@@ -374,8 +374,193 @@ int testmtcnn()
 
 	return EXIT_SUCCESS;
 }
+int testlocalvideo()
+{
+    seeta::ModelSetting::Device device = seeta::ModelSetting::CPU;
+    int id = 0;
+    seeta::ModelSetting FD_model( "../models/fd_2_00.dat", device, id );
+    seeta::ModelSetting FL_model( "../models/pd_2_00_pts81.dat", device, id );
+
+	seeta::FaceDetector FD(FD_model);
+	seeta::FaceLandmarker FL(FL_model);
+
+	FD.set(seeta::FaceDetector::PROPERTY_VIDEO_STABLE, 1);
+	//FD.set(seeta::FaceDetector::PROPERTY_THRESHOLD3, 0.8);
+
+	 int camera_id = 0;
+	// cv::VideoCapture capture(camera_id);
+
+	cv::VideoCapture capture;
+	capture.open("../1.mp4");
+
+	if (!capture.isOpened())
+	{
+		std::cerr << "Can not open camera(" << camera_id << "), testing image..." << std::endl;
+		return test_image(FD, FL);
+	}
+
+	auto video_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
+	auto video_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+
+	std::cout << "Open camera(" << camera_id << ")" << std::endl;
+	std::cout<<"video_width:"<<video_width<<"	video_height:"<<video_height<<std::endl;
+
+	cv::Mat frame;
+	int cnt = 0;
+	float avgTime = 0;
+	float totalTime = 0;
+
+
+
+
+	FaceTrack tracker;
+	std::string modelPath = "/home/jiawenhao/beauty/beautify_linux/models/detection/mtcnn";
+
+	int minFace = 40;
+	tracker.initTrack(modelPath, minFace);
+
+//	VideoWriter video("test_0_no_mopi.mp4", CV_FOURCC('M', 'J', 'P', 'G'), 20.0, Size(1600, 450),1);
+	
+	while (capture.isOpened())
+	{
+		
+		capture.grab();
+		capture.retrieve(frame);
+		//frame = imread("/home/jiawenhao/beauty/beautify_linux/imgs/2.jpg");
+		if (frame.empty()) break;
+
+
+
+		//cv::resize(frame,frame,cv::Size(800,450));
+		seeta::cv::ImageData simage = frame;
+
+		double t1 = (double)cv::getTickCount();
+		//auto faces = FD.detect(simage);
+		vector<Rect> faceRects(1);
+		tracker.detectTrackFace(faceRects[0], frame);
+
+		double t2 = (double)cv::getTickCount();
+		int dettime = (int)((t2 - t1) * 1000 / cv::getTickFrequency());
+
+		//cv::rectangle(frame, faceRects[0], CV_RGB(128, 128, 255), 3);
+
+		
+
+		vector<SeetaFaceInfo> facesVec;
+		SeetaFaceInfo f;
+		f.pos.x = faceRects[0].x;
+		f.pos.y = faceRects[0].y;
+		f.pos.width = faceRects[0].width;
+		f.pos.height = faceRects[0].height;
+		facesVec.push_back(f);
+
+
+
+
+		SeetaFaceInfoArray  faces;
+		faces.size = facesVec.size();
+		faces.data = facesVec.data();
+
+
+		vector<cv::Rect> bbox;
+		vector<vector<Point2f>> multiLandmarks;
+		#if 1
+		for (int i = 0; i < faces.size; ++i)
+		{
+			auto &face = faces.data[i];
+			auto points = FL.mark(simage, face.pos);
+			vector<Point2f> landmarks;
+
+			//cv::rectangle(frame, cv::Rect(face.pos.x, face.pos.y, face.pos.width, face.pos.height), CV_RGB(128, 128, 255), 3);
+			for (int i = 0; i < points.size(); i++)
+			{
+				auto point = points[i];
+				landmarks.push_back(cv::Point(point.x, point.y));
+				if(i >= 0 && i <= 8 || i >= 9 && i <= 17)
+				{
+					//cv::circle(frame, cv::Point(point.x, point.y), 2, CV_RGB(128, 255, 128), -1);
+				}
+				
+				if(i == 69 || i == 72 || i == 77 || i == 80 || i == 34)
+				{
+				//	cv::circle(frame, cv::Point(point.x, point.y), 2, CV_RGB(255, 0, 0), -1);
+				//	printf("-----%d  %d %d\n",i,(int)point.x,(int)point.y);
+					
+				}
+				// cv::circle(frame, cv::Point(point.x, point.y), 2, CV_RGB(255, 0, 0), -1);
+				// cv::putText(frame, to_string(i), Point(point.x, point.y),
+				// 	cv::FONT_HERSHEY_SIMPLEX, 0.3, cv::Scalar(255, 0, 0));
+			}
+			bbox.push_back(cv::Rect(face.pos.x, face.pos.y, face.pos.width, face.pos.height));
+			multiLandmarks.push_back(landmarks);
+		}
+		#endif
+
+		double t3 = (double)cv::getTickCount();
+		int cost_time = (int)((t3 - t1) * 1000 / cv::getTickFrequency());
+		totalTime += cost_time;
+		cnt++;
+
+		avgTime = totalTime /cnt;
+		printf("detect:%d    det&&align:%d  avg:%.2f\n", 
+			dettime, cost_time,avgTime);
+
+
+		//	cv::imshow("Frame", frame);
+ 
+		Mat frameOri = frame.clone();
+
+		#if 1
+		//face lift 
+		double tfacelift = (double)cv::getTickCount();
+		
+		beauty::general_face_lift(frame, bbox, multiLandmarks); 
+
+		double tfacelift2 = (double)cv::getTickCount();
+		printf("tfacelift %gms\n", (tfacelift2 - tfacelift) * 1000 / cv::getTickFrequency());
+
+		//eye enlarge
+		beauty::EyeEnlarge eyeEnlarge;
+		eyeEnlarge.generalEyeEnlarge(frame, bbox, multiLandmarks); 
+		#endif
+		double teyeEnlarge = (double)cv::getTickCount();
+		//	printf("teyeEnlarge %gms\n", (teyeEnlarge - tfacelift2) * 1000 / cv::getTickFrequency());
+
+		//smooth
+		beauty::SkinSmooth skin_smooth;
+		skin_smooth.smooth(frame,bbox);  
+
+		double tskin_smooth = (double)cv::getTickCount();
+		printf("tskin_smooth %gms\n", (tskin_smooth - teyeEnlarge) * 1000 / cv::getTickFrequency());
+
+		printf("alltime %gms\n", (tskin_smooth - t1) * 1000 / cv::getTickFrequency());
+		
+
+		//	cv::imshow("beautify", frame);
+		
+
+		Mat saveMat;
+		hconcat(frameOri,frame,saveMat);
+		imshow("diff",saveMat);
+
+		// imwrite("./diff/1_ori_"+ to_string(cnt)+".jpg",frameOri,vector<int>{99});
+		// imwrite("./diff/1_our_"+ to_string(cnt)+".jpg",frame,vector<int>{99});
+	//	video << saveMat;
+		
+
+		auto key = cv::waitKey(1);
+		if (key == 27)
+		{
+			break;
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
 int main()
 {
 	testmtcnn();
+
+	//testlocalvideo();
 	//testVideo();
 }
