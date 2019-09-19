@@ -5,7 +5,9 @@
 #include "beauty/skin_smooth.h"
 #include <vector>
 #include <opencv2/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include "beauty/commontools.h"
+#include "beauty/rbf.h"
 
 using namespace std;
 using namespace cv;
@@ -113,6 +115,48 @@ namespace beauty
 			}
 		} 
 	}
+	//导向滤波器
+	Mat guidedFilterCore(Mat &srcMat, Mat &guidedMat, int radius, double eps)
+	{
+		//------------【0】转换源图像信息，将输入扩展为64位浮点型，以便以后做乘法------------
+		srcMat.convertTo(srcMat, CV_64FC1);
+		guidedMat.convertTo(guidedMat, CV_64FC1);
+		//--------------【1】各种均值计算----------------------------------
+		Mat mean_p, mean_I, mean_Ip, mean_II;
+		boxFilter(srcMat, mean_p, CV_64FC1, Size(radius, radius));//生成待滤波图像均值mean_p	
+		boxFilter(guidedMat, mean_I, CV_64FC1, Size(radius, radius));//生成引导图像均值mean_I	
+		boxFilter(srcMat.mul(guidedMat), mean_Ip, CV_64FC1, Size(radius, radius));//生成互相关均值mean_Ip
+		boxFilter(guidedMat.mul(guidedMat), mean_II, CV_64FC1, Size(radius, radius));//生成引导图像自相关均值mean_II
+		//--------------【2】计算相关系数，计算Ip的协方差cov和I的方差var------------------
+		Mat cov_Ip = mean_Ip - mean_I.mul(mean_p);
+		Mat var_I = mean_II - mean_I.mul(mean_I);
+		//---------------【3】计算参数系数a、b-------------------
+		Mat a = cov_Ip / (var_I + eps);
+		Mat b = mean_p - a.mul(mean_I);
+		//--------------【4】计算系数a、b的均值-----------------
+		Mat mean_a, mean_b;
+		boxFilter(a, mean_a, CV_64FC1, Size(radius, radius));
+		boxFilter(b, mean_b, CV_64FC1, Size(radius, radius));
+		//---------------【5】生成输出矩阵------------------
+		Mat dstImage = mean_a.mul(srcMat) + mean_b;
+		return dstImage;
+	}
+	void guidedFilter(const Mat &srcMat, Mat &dstMat, int radius, double eps)
+	{
+		vector<Mat> vSrcImage, vResultImage;
+		split(srcMat, vSrcImage);
+		for (int i = 0; i < 3; i++)
+		{
+			Mat tempImage;
+			vSrcImage[i].convertTo(tempImage, CV_64FC1, 1.0 / 255.0);//将分通道转换成浮点型数据
+			Mat cloneImage = tempImage.clone();	//将tempImage复制一份到cloneImage
+			Mat resultImage = guidedFilterCore(tempImage, cloneImage, radius, eps);//对分通道分别进行导向滤波，半径为1、3、5...等奇数 eps 0.01
+			vResultImage.push_back(resultImage);//将分通道导向滤波后的结果存放到vResultImage中
+		}
+		//----------【3】将分通道导向滤波后结果合并-----------------------
+		merge(vResultImage, dstMat);
+		dstMat.convertTo(dstMat, CV_8UC3, 255);//将归一化的数字，回到0-255区间
+	}
 	void SkinSmooth::smooth(cv::Mat& img,const vector<cv::Rect>& rects)
 	{
 		//set parameters
@@ -183,11 +227,31 @@ namespace beauty
 
 				}
 				
-				TimeStatic(3,NULL);
-				//bilateralFilter(roi, tmp1, dx, fc, fc);//dx=10 fc=25
+				
+				bilateralFilter(roi, tmp1, dx, fc, fc);//dx=10 fc=25
 				//bilateralFilter(roi.data, tmp1.data, roi.cols, roi.rows, 10);
-				bilateralFilter(roi, tmp1, 9, 15, 15);
-				TimeStatic(3,"bilateral filter");
+				//bilateralFilter(roi, tmp1, 9, 15, 15);
+				// imshow("roi", roi);
+				// imshow("tmp1", tmp1);
+TimeStatic(3,NULL);
+				// Mat guidetmp;
+				// guidedFilter(roi,guidetmp,1,0.01);
+ TimeStatic(3,"bilateral filter");
+// 				unsigned char * img_out = 0;
+
+// 				recursive_bf(roi.data, img_out, 0.03, 0.1, roi.cols, roi.rows, roi.channels());
+
+// 				Mat imgbf(Size(roi.cols, roi.rows), CV_8UC3);
+// 				for (int i = 0; i < roi.cols * roi.rows * 3; i++)
+// 				{
+// 					imgbf.at<cv::Vec3b>(i / (roi.cols * 3), (i % (roi.cols * 3)) / 3)[i % 3] = img_out[i];
+// 				}
+
+ 				//imshow("guidetmp", guidetmp);
+				
+
+
+
 				tmp2 = (tmp1 - roi + 128);
 
 				

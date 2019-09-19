@@ -16,8 +16,8 @@
 #include "beauty/face_lift.h"
 #include "beauty/skin_smooth.h"
 #include "beauty/eye_enlarge.h"
-
-
+#include "beauty/image_brighten.h"
+#include "beauty/commontools.h"
 #include "face_track.h"
 #include "ncnn_mtcnn.h"
 
@@ -355,12 +355,53 @@ int testmtcnn()
 		printf("alltime %gms\n", (tskin_smooth - t1) * 1000 / cv::getTickFrequency());
 		
 
-		//	cv::imshow("beautify", frame);
+		//brighten
+		Mat demazeMat;
+		TimeStatic(4,NULL);
+		enhance::brighten(frameOri, demazeMat);
+		TimeStatic(4,"demaze");
+		cv::imshow("demaze", demazeMat);
+
+		// imwrite("./diff/1_ori_"+ to_string(cnt)+".jpg",frameOri,vector<int>{99});
+		// imwrite("./diff/1_our_"+ to_string(cnt)+".jpg",frame,vector<int>{99});
+			
 		
 
-		Mat saveMat;
-		hconcat(frameOri,frame,saveMat);
-		imshow("diff",saveMat);
+		// enhance::anotherEnhanced(frameOri,brightenMat);
+		// cv::imshow("brighten2", brightenMat);
+		// enhance::Enhancement(frameOri,0.8, brightenMat);
+		// cv::imshow("brighten3", brightenMat);
+		// enhance::BrightnessAndContrastAuto(frameOri, brightenMat,1.5);
+		// cv::imshow("brighten4", brightenMat);
+
+		Mat demazegammaMat;
+		enhance::MyGammaCorrection(demazeMat, demazegammaMat,0.7);
+		cv::imshow("demaze+gamma", demazegammaMat);
+
+
+
+		Mat gammaMat;
+		enhance::MyGammaCorrection(frameOri, gammaMat,0.7);
+		cv::imshow("MyGammaCorrection", gammaMat);
+
+
+		Mat gammademaze;
+		enhance::brighten(gammaMat, gammademaze);
+		cv::imshow("gamma + demaze", gammademaze);
+
+		//拼接结果对比
+		Mat firstRow,secondRow,diff;
+		hconcat(frameOri,frame,firstRow);
+		hconcat(demazeMat,gammaMat,secondRow);
+		
+
+		vconcat(firstRow,secondRow,diff);
+		//video << diff;
+
+		imshow("diff",diff);
+		
+
+		
 
 		//video << saveMat;
 		
@@ -385,7 +426,6 @@ int testlocalvideo()
 	seeta::FaceLandmarker FL(FL_model);
 
 	FD.set(seeta::FaceDetector::PROPERTY_VIDEO_STABLE, 1);
-	//FD.set(seeta::FaceDetector::PROPERTY_THRESHOLD3, 0.8);
 
 	 int camera_id = 0;
 	// cv::VideoCapture capture(camera_id);
@@ -401,6 +441,8 @@ int testlocalvideo()
 
 	auto video_width = capture.get(cv::CAP_PROP_FRAME_WIDTH);
 	auto video_height = capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+	auto video_fps = capture.get(CAP_PROP_FPS);
+	auto video_fourcc = capture.get(CAP_PROP_FOURCC);
 
 	std::cout << "Open camera(" << camera_id << ")" << std::endl;
 	std::cout<<"video_width:"<<video_width<<"	video_height:"<<video_height<<std::endl;
@@ -419,7 +461,10 @@ int testlocalvideo()
 	int minFace = 40;
 	tracker.initTrack(modelPath, minFace);
 
-//	VideoWriter video("test_0_no_mopi.mp4", CV_FOURCC('M', 'J', 'P', 'G'), 20.0, Size(1600, 450),1);
+	//	VideoWriter video("test_0_no_mopi.mp4", CV_FOURCC('M', 'J', 'P', 'G'), 20.0, Size(1600, 450),1);
+	
+
+	//	VideoWriter video("0919_1.mp4", video_fourcc, video_fps, Size(1600, 450*2),1);
 	
 	while (capture.isOpened())
 	{
@@ -431,11 +476,11 @@ int testlocalvideo()
 
 
 
-		//cv::resize(frame,frame,cv::Size(800,450));
+		cv::resize(frame,frame,cv::Size(800,450));
 		seeta::cv::ImageData simage = frame;
 
 		double t1 = (double)cv::getTickCount();
-		//auto faces = FD.detect(simage);
+		
 		vector<Rect> faceRects(1);
 		tracker.detectTrackFace(faceRects[0], frame);
 
@@ -464,7 +509,7 @@ int testlocalvideo()
 
 		vector<cv::Rect> bbox;
 		vector<vector<Point2f>> multiLandmarks;
-		#if 1
+		#if 0
 		for (int i = 0; i < faces.size; ++i)
 		{
 			auto &face = faces.data[i];
@@ -510,7 +555,7 @@ int testlocalvideo()
  
 		Mat frameOri = frame.clone();
 
-		#if 1
+		#if 0
 		//face lift 
 		double tfacelift = (double)cv::getTickCount();
 		
@@ -539,15 +584,52 @@ int testlocalvideo()
 		//	cv::imshow("beautify", frame);
 		
 
-		Mat saveMat;
-		hconcat(frameOri,frame,saveMat);
-		imshow("diff",saveMat);
+		
+
+		//brighten
+		Mat demazeMat;
+		TimeStatic(4,NULL);
+		enhance::brighten(frameOri, demazeMat);
+		TimeStatic(4,"demaze");
+		cv::imshow("demaze", demazeMat);
 
 		// imwrite("./diff/1_ori_"+ to_string(cnt)+".jpg",frameOri,vector<int>{99});
 		// imwrite("./diff/1_our_"+ to_string(cnt)+".jpg",frame,vector<int>{99});
-	//	video << saveMat;
+			
 		
 
+		// enhance::anotherEnhanced(frameOri,brightenMat);
+		// cv::imshow("brighten2", brightenMat);
+		// enhance::Enhancement(frameOri,0.8, brightenMat);
+		// cv::imshow("brighten3", brightenMat);
+		// enhance::BrightnessAndContrastAuto(frameOri, brightenMat,1.5);
+		// cv::imshow("brighten4", brightenMat);
+
+		Mat demazegammaMat;
+		enhance::MyGammaCorrection(demazeMat, demazegammaMat,0.7);
+		cv::imshow("demaze+gamma", demazegammaMat);
+
+
+
+		Mat gammaMat;
+		enhance::MyGammaCorrection(frameOri, gammaMat,0.7);
+		cv::imshow("MyGammaCorrection", gammaMat);
+
+
+		Mat gammademaze;
+		enhance::brighten(gammaMat, gammademaze);
+		cv::imshow("gamma + demaze", gammademaze);
+
+		//拼接结果对比
+		Mat firstRow,secondRow,diff;
+		hconcat(frameOri,frame,firstRow);
+		hconcat(demazeMat,gammaMat,secondRow);
+		
+
+		vconcat(firstRow,secondRow,diff);
+		//video << diff;
+
+		imshow("diff",diff);
 		auto key = cv::waitKey(1);
 		if (key == 27)
 		{
