@@ -31,4 +31,6 @@ namespace enhance
     void BrightnessAndContrastAuto(const cv::Mat &src, cv::Mat &dst, float clipHistPercent);
     void MyGammaCorrection(cv::Mat& src, cv::Mat& dst, float fGamma);
 
+    void ACE(const cv::Mat& src, cv::Mat& dst,int C = 3, int n = 3, float MaxCG = 7.5);
+    
 }

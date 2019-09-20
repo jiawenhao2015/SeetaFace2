@@ -199,6 +199,13 @@ int testVideo()
 	return EXIT_SUCCESS;
 }
 
+
+int g_C = 3 ,g_CMax = 300;
+int g_n = 3, g_nMax = 30;
+int g_maxCG = 75, g_maxCGMax = 100;
+Mat frameOri;
+//定义回调函数
+void on_bilateralFilterTrackbar(int,void*);
 int testmtcnn()
 {
     seeta::ModelSetting::Device device = seeta::ModelSetting::CPU;
@@ -327,7 +334,7 @@ int testmtcnn()
 
 		//	cv::imshow("Frame", frame);
  
-		Mat frameOri = frame.clone();
+		frameOri = frame.clone();
 
 		#if 1
 		//face lift 
@@ -356,11 +363,11 @@ int testmtcnn()
 		
 
 		//brighten
-		Mat demazeMat;
+		Mat dehazeMat;
 		TimeStatic(4,NULL);
-		enhance::brighten(frameOri, demazeMat);
-		TimeStatic(4,"demaze");
-		cv::imshow("demaze", demazeMat);
+		enhance::brighten(frameOri, dehazeMat);
+		TimeStatic(4,"dehaze");
+		//cv::imshow("dehaze", dehazeMat);
 
 		// imwrite("./diff/1_ori_"+ to_string(cnt)+".jpg",frameOri,vector<int>{99});
 		// imwrite("./diff/1_our_"+ to_string(cnt)+".jpg",frame,vector<int>{99});
@@ -374,33 +381,52 @@ int testmtcnn()
 		// enhance::BrightnessAndContrastAuto(frameOri, brightenMat,1.5);
 		// cv::imshow("brighten4", brightenMat);
 
-		Mat demazegammaMat;
-		enhance::MyGammaCorrection(demazeMat, demazegammaMat,0.7);
-		cv::imshow("demaze+gamma", demazegammaMat);
-
-
+		Mat dehazegammaMat;
+		enhance::MyGammaCorrection(dehazeMat, dehazegammaMat,0.7);
+		//cv::imshow("dehaze+gamma", dehazegammaMat);
 
 		Mat gammaMat;
 		enhance::MyGammaCorrection(frameOri, gammaMat,0.7);
-		cv::imshow("MyGammaCorrection", gammaMat);
+		//cv::imshow("MyGammaCorrection", gammaMat);
 
 
-		Mat gammademaze;
-		enhance::brighten(gammaMat, gammademaze);
-		cv::imshow("gamma + demaze", gammademaze);
+		Mat gammadehaze;
+		enhance::brighten(gammaMat, gammadehaze);
+		//cv::imshow("gamma + dehaze", gammadehaze);
+
+
+		//创建轨迹条
+		// createTrackbar("c", "ACE", &g_C, g_CMax, on_bilateralFilterTrackbar);
+		// on_bilateralFilterTrackbar(g_C,0);
+
+		// createTrackbar("n", "ACE", &g_n, g_nMax, on_bilateralFilterTrackbar);
+		// on_bilateralFilterTrackbar(g_n,0);
+
+		// createTrackbar("g_maxCG", "ACE", &g_maxCG, g_maxCGMax, on_bilateralFilterTrackbar);
+		// on_bilateralFilterTrackbar(g_n,0);
+
+		// Mat aceMat;
+		// enhance::ACE(frameOri, aceMat);
+		// cv::imshow("aceMat", gammaMat);
 
 		//拼接结果对比
 		Mat firstRow,secondRow,diff;
+		putText(frameOri,"original",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
+		putText(frame,"contrast",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
+		putText(dehazeMat,"dehaze",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
+		putText(gammaMat,"gamma",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
 		hconcat(frameOri,frame,firstRow);
-		hconcat(demazeMat,gammaMat,secondRow);
-		
-
+		hconcat(dehazeMat,gammaMat,secondRow);
 		vconcat(firstRow,secondRow,diff);
+
 		//video << diff;
+
+
+
 
 		imshow("diff",diff);
 		
-
+	
 		
 
 		//video << saveMat;
@@ -431,7 +457,7 @@ int testlocalvideo()
 	// cv::VideoCapture capture(camera_id);
 
 	cv::VideoCapture capture;
-	capture.open("../1.mp4");
+	capture.open("../0.mp4");
 
 	if (!capture.isOpened())
 	{
@@ -464,7 +490,7 @@ int testlocalvideo()
 	//	VideoWriter video("test_0_no_mopi.mp4", CV_FOURCC('M', 'J', 'P', 'G'), 20.0, Size(1600, 450),1);
 	
 
-	//	VideoWriter video("0919_1.mp4", video_fourcc, video_fps, Size(1600, 450*2),1);
+		VideoWriter video("0919_0.mp4", video_fourcc, video_fps, Size(1600, 450*2),1);
 	
 	while (capture.isOpened())
 	{
@@ -587,11 +613,11 @@ int testlocalvideo()
 		
 
 		//brighten
-		Mat demazeMat;
+		Mat dehazeMat;
 		TimeStatic(4,NULL);
-		enhance::brighten(frameOri, demazeMat);
-		TimeStatic(4,"demaze");
-		cv::imshow("demaze", demazeMat);
+		enhance::brighten(frameOri, dehazeMat);
+		TimeStatic(4,"dehaze");
+		cv::imshow("dehaze", dehazeMat);
 
 		// imwrite("./diff/1_ori_"+ to_string(cnt)+".jpg",frameOri,vector<int>{99});
 		// imwrite("./diff/1_our_"+ to_string(cnt)+".jpg",frame,vector<int>{99});
@@ -605,9 +631,9 @@ int testlocalvideo()
 		// enhance::BrightnessAndContrastAuto(frameOri, brightenMat,1.5);
 		// cv::imshow("brighten4", brightenMat);
 
-		Mat demazegammaMat;
-		enhance::MyGammaCorrection(demazeMat, demazegammaMat,0.7);
-		cv::imshow("demaze+gamma", demazegammaMat);
+		Mat dehazegammaMat;
+		enhance::MyGammaCorrection(dehazeMat, dehazegammaMat,0.7);
+		cv::imshow("dehaze+gamma", dehazegammaMat);
 
 
 
@@ -616,18 +642,24 @@ int testlocalvideo()
 		cv::imshow("MyGammaCorrection", gammaMat);
 
 
-		Mat gammademaze;
-		enhance::brighten(gammaMat, gammademaze);
-		cv::imshow("gamma + demaze", gammademaze);
+		Mat gammadehaze;
+		enhance::brighten(gammaMat, gammadehaze);
+		cv::imshow("gamma + dehaze", gammadehaze);
 
 		//拼接结果对比
 		Mat firstRow,secondRow,diff;
-		hconcat(frameOri,frame,firstRow);
-		hconcat(demazeMat,gammaMat,secondRow);
-		
 
+		putText(frameOri,"original",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
+		putText(frame,"contrast",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
+		putText(dehazeMat,"dehaze",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
+		putText(gammaMat,"gamma",Point(50,50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,0,255),3);
+
+
+		hconcat(frameOri,frame,firstRow);
+		hconcat(dehazeMat,gammaMat,secondRow);
 		vconcat(firstRow,secondRow,diff);
-		//video << diff;
+
+		video << diff;
 
 		imshow("diff",diff);
 		auto key = cv::waitKey(1);
@@ -641,8 +673,22 @@ int testlocalvideo()
 }
 int main()
 {
-	testmtcnn();
+	//testmtcnn();
 
-	//testlocalvideo();
+	testlocalvideo();
 	//testVideo();
+}
+
+static int cnt = 1;
+void on_bilateralFilterTrackbar(int,void *)
+{
+    double t1 = (double)cv::getTickCount();
+    //bilateralFilter(g_srcImage, g_dstImage, g_ndValue, g_nsigmaColorValue, g_nsigmaSpaceValue);
+    Mat aceMat;
+	enhance::ACE(frameOri, aceMat, g_C, g_n, g_CMax*1.0/10);
+    double t2 = (double)cv::getTickCount();
+	//int dettime = (int)((t2 - t1) * 1000 / cv::getTickFrequency());
+    printf("%d,current costtime %gms\n", cnt++,((t2 - t1) * 1000 / cv::getTickFrequency()));
+    imshow("ACE", aceMat);
+	auto key = cv::waitKey(1);
 }

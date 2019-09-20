@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <opencv2/imgproc/imgproc.hpp>
 
+using namespace cv;
+
 void enhance::ImageBrighten::brighten(const cv::Mat &src, cv::Mat &dst)
 {
     CV_Assert(src.type() == CV_8UC3 || src.type() == CV_8UC1);
@@ -600,5 +602,65 @@ void MyGammaCorrection(cv::Mat &src, cv::Mat &dst, float fGamma)
 //     delete[] mean_b;
 //     return outimg;
 // }
+
+
+
+void ACEcore(const Mat& src, Mat& dst,int C = 3, int n = 3, float MaxCG = 7.5)
+{
+    int row = src.rows;
+    int col = src.cols;
+    Mat meanLocal; //图像局部均值
+    Mat varLocal; //图像局部方差
+    Mat meanGlobal; //全局均值
+    Mat varGlobal; //全局标准差
+    blur(src.clone(), meanLocal, Size(n, n));
+    Mat highFreq = src - meanLocal;
+    varLocal = highFreq.mul(highFreq);
+    varLocal.convertTo(varLocal, CV_32F);
+    for(int i = 0; i < row; i++){
+        for(int j = 0; j < col; j++){
+            varLocal.at<float>(i, j) = (float)sqrt(varLocal.at<float>(i, j));
+        }
+    }
+    meanStdDev(src, meanGlobal, varGlobal);
+    Mat gainArr = meanGlobal / varLocal; //增益系数矩阵
+    for(int i = 0; i < row; i++){
+        for(int j = 0; j < col; j++){
+            if(gainArr.at<float>(i, j) > MaxCG){
+                gainArr.at<float>(i, j) = MaxCG;
+            }
+        }
+    }
+    printf("%d %d\n", row, col);
+    gainArr.convertTo(gainArr, CV_8U);
+    gainArr = gainArr.mul(highFreq);
+    Mat dst1 = meanLocal + gainArr;
+    Mat dst2 = meanLocal + C * highFreq;
+    
+    dst = dst1;
+}
+
+
+void ACE(const cv::Mat& src, cv::Mat& dst,int C, int n, float MaxCG)
+{
+    std::vector <cv::Mat> now;
+    split(src, now);
+    // C = 150;
+    // n = 5;
+    // MaxCG = 3;
+    cv::Mat dst1, dst2, dst3;
+    ACEcore(now[0], dst1, C, n, MaxCG);
+    ACEcore(now[1], dst2, C, n, MaxCG);
+    ACEcore(now[2], dst3, C, n, MaxCG);
+    now.clear();
+
+    now.push_back(dst1);
+    now.push_back(dst2);
+    now.push_back(dst3);
+    cv::merge(now, dst);
+}
+
+
+
 
 } // namespace enhance
