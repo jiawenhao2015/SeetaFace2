@@ -22,16 +22,40 @@
 
 
 - 图像变形 blog http://www.voidcn.com/article/p-nfwuzbva-rn.html
-- 
+- 美颜工程 https://github.com/lyapple2008/FaceBeauty
+
 #### 3.1瘦脸
 - 发现核心公式好像都是这一个：https://www.cnblogs.com/xiaotie/archive/2009/12/08/1619046.html
 - 图像瘦脸算法:https://blog.csdn.net/qq_36810544/article/details/89072925
 - 插值算法优化：https://www.cnblogs.com/yssongest/p/5303151.html
 #### 3.2大眼
 - imageshop博客地址：https://www.cnblogs.com/imageshop/p/3847357.html
-#### 3.1美白磨皮
+#### 3.3美白磨皮
 - 磨皮算法步骤介绍 https://www.cnblogs.com/Imageshop/p/4709710.html 
 - 算法python版本 https://github.com/PerpetualSmile/BeautyCamera/blob/master/main.py
+- 一些专利链接：
+  - 一种基于gpu的移动端高质量美颜的实时处理方法
+https://patents.google.com/patent/CN105976308A/zh 
+  - 一种即时视频中的人脸美化方法和电子设备
+https://patents.google.com/patent/CN104952036B/zh
+  - 一种快速实时的视频美颜方法
+ https://patents.google.com/patent/CN106447606A/zh
+  - 一种任意光线环境下的图像肤色美化方法及系统
+  https://patents.google.com/patent/CN105608677A/zh
+- 去雾思路
+  - https://github.com/evmavrop/Hyperion
+  - https://github.com/isaacchanghau/optimizedimageenhance
+
+- 快速双边滤波。。没跑通
+  - https://cloud.tencent.com/developer/article/1094493
+- 图像保边滤波算法集锦--EPM滤波算法与实现 **没测试**。。
+  - https://blog.csdn.net/Trent1985/article/details/80802144
+  - https://github.com/lrs0304/face_beauty_on_windows/blob/master/mainwindow.cpp
+- 图像增强
+  - 限制对比度自适应直方图均衡(CLAHE算法)
+   https://blog.csdn.net/grafx/article/details/53311915
+
+
 
 
 
